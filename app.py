@@ -89,5 +89,23 @@ def ise_proxy():
     content_type = r.headers.get("Content-Type", "text/plain")
     return Response(r.content, status=r.status_code, content_type=content_type)
 
+
+@app.get("/__debug__/auth")
+def debug_auth():
+    seen = (
+        request.headers.get("X-Plugin-Key")
+        or request.headers.get("X-Token")
+        or (request.headers.get("Authorization") or "").replace("Bearer ", "").strip()
+    )
+    masked_env = (TOKEN[:3] + "..." + TOKEN[-3:]) if TOKEN else "None"
+    masked_seen = (seen[:3] + "..." + seen[-3:]) if seen else "None"
+    return jsonify({
+        "env_PLUGIN_TOKEN_len": len(TOKEN) if TOKEN else 0,
+        "env_PLUGIN_TOKEN_peek": masked_env,
+        "incoming_token_len": len(seen) if seen else 0,
+        "incoming_token_peek": masked_seen
+    })
+
+
 if __name__ == "__main__":
     app.run(host=HOST, port=PORT)
