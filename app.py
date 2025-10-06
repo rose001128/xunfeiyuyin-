@@ -107,5 +107,19 @@ def debug_auth():
     })
 
 
+@app.get("/__debug__/routes")
+def debug_routes():
+    return jsonify({
+        "routes": [
+            {"rule": str(r.rule), "methods": sorted(r.methods)}
+            for r in app.url_map.iter_rules()
+        ]
+    })
+
+@app.get("/__debug__/ping")
+def debug_ping():
+    return jsonify({"ok": True})
+
+
 if __name__ == "__main__":
     app.run(host=HOST, port=PORT)
