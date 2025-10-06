@@ -26,9 +26,13 @@ def unauthorized():
 @app.post("/iflytek/ise")
 def ise_proxy():
     # Simple token check
-    incoming = request.headers.get("X-Plugin-Key") or request.headers.get("X-Token")
-    if not TOKEN or incoming != TOKEN:
-        return unauthorized()
+    incoming = (
+    request.headers.get("X-Plugin-Key")
+    or request.headers.get("X-Token")
+    or (request.headers.get("Authorization") or "").replace("Bearer ", "").strip()
+)
+if not TOKEN or incoming != TOKEN:
+    return jsonify({"error": "Unauthorized"}), 401
 
     try:
         data = request.get_json(force=True, silent=True) or {}
